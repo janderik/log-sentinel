@@ -1,0 +1,19 @@
+Oct 10 13:55:36 webserver01 sshd[1234]: Accepted publickey for frank from 192.168.1.1 port 51922 ssh2: RSA SHA256:abc123
+Oct 10 14:01:12 webserver01 sshd[1234]: Failed password for invalid user admin from 10.0.0.2 port 54321 ssh2
+Oct 10 14:02:45 mailserver01 postfix/smtpd[5678]: connect from unknown[203.0.113.5]
+Oct 10 14:05:22 webserver01 sudo[9012]: alice : TTY=pts/0 ; PWD=/var/www ; USER=root ; COMMAND=/bin/systemctl restart nginx
+Oct 10 14:10:33 webserver01 sshd[1234]: Failed password for invalid user admin from 10.0.0.2 port 54322 ssh2
+Oct 10 14:20:18 webserver01 sshd[1234]: Failed password for invalid user admin from 203.0.113.5 port 59384 ssh2
+Oct 10 14:22:44 webserver01 sshd[1234]: Failed password for invalid user admin from 10.0.0.2 port 54323 ssh2
+Oct 10 14:25:10 webserver01 su[3456]: pam_unix(su:session): session opened for user postgres by alice(uid=1000)
+Oct 10 14:30:55 mailserver01 postfix/smtpd[5678]: warning: hostname 10.0.0.2 does not resolve to address
+Oct 10 14:32:12 webserver01 sshd[1234]: Failed password for invalid user admin from 10.0.0.2 port 54324 ssh2
+Oct 10 14:35:40 webserver01 sshd[1234]: Failed password for invalid user root from 10.0.0.2 port 54325 ssh2
+Oct 10 14:40:05 webserver01 sshd[1234]: Failed password for invalid user admin from 203.0.113.5 port 59385 ssh2
+Oct 10 14:42:18 webserver01 sshd[1234]: Failed password for invalid user admin from 10.0.0.2 port 54326 ssh2
+Oct 10 14:48:59 webserver01 kernel: [UFW BLOCK] IN=eth0 OUT= MAC=00:01:02:03:04:05:06:07:08:09:0a:0b:08:00 SRC=203.0.113.5 DST=10.0.0.1 LEN=40 TOS=0x00 PREC=0x00 TTL=242 ID=12345 PROTO=TCP SPT=49382 DPT=22 WINDOW=1024 RES=0x00 SYN URGP=0
+Oct 10 14:50:11 webserver01 sshd[1234]: Failed password for invalid user admin from 10.0.0.2 port 54327 ssh2
+Oct 10 14:52:44 webserver01 sshd[1234]: Failed password for invalid user admin from 10.0.0.2 port 54328 ssh2
+Oct 10 14:55:02 webserver01 sshd[1234]: Failed password for invalid user admin from 10.0.0.2 port 54329 ssh2
+Oct 10 14:55:30 webserver01 sshd[1234]: Accepted publickey for frank from 192.168.1.1 port 51923 ssh2: RSA SHA256:def456
+Oct 10 14:58:10 webserver01 sudo[9012]: frank : TTY=pts/1 ; PWD=/home/frank ; USER=root ; COMMAND=/bin/systemctl status sshd
