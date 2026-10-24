@@ -1,9 +1,8 @@
-from typing import Optional, Any
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
-import joblib
 
 
 class AnomalyDetector:
@@ -22,7 +21,7 @@ class AnomalyDetector:
             n_jobs=-1,
         )
         self._fitted = False
-        self._feature_names: Optional[list[str]] = None
+        self._feature_names: list[str] | None = None
 
     @property
     def is_fitted(self) -> bool:

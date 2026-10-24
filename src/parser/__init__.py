@@ -1,4 +1,4 @@
-from .log_parser import LogParser, LogFormat
+from .log_parser import LogFormat, LogParser
 from .normalizer import LogNormalizer, NormalizedLog
 
-__all__ = ["LogParser", "LogFormat", "LogNormalizer", "NormalizedLog"]
+__all__ = ["LogFormat", "LogNormalizer", "LogParser", "NormalizedLog"]

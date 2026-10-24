@@ -1,18 +1,18 @@
-from typing import Optional, Any
+from typing import Any
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, f1_score
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, accuracy_score, f1_score
-import joblib
 
 
 class LogClassifier:
     def __init__(
         self,
         n_estimators: int = 100,
-        max_depth: Optional[int] = None,
+        max_depth: int | None = None,
         random_state: int = 42,
     ) -> None:
         self._model = RandomForestClassifier(
@@ -23,9 +23,9 @@ class LogClassifier:
             class_weight="balanced",
         )
         self._fitted = False
-        self._feature_names: Optional[list[str]] = None
-        self._label_encoder: Optional[dict[str, int]] = None
-        self._reverse_encoder: Optional[dict[int, str]] = None
+        self._feature_names: list[str] | None = None
+        self._label_encoder: dict[str, int] | None = None
+        self._reverse_encoder: dict[int, str] | None = None
 
     @property
     def is_fitted(self) -> bool:

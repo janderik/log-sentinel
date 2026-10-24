@@ -1,18 +1,18 @@
-import re
 import json
-from datetime import datetime
+import re
+from collections.abc import Iterator
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Pattern, Optional, Iterator
-from dataclasses import dataclass, field, asdict
+from re import Pattern
 
 
 @dataclass
 class ParsedLog:
     raw: str
-    timestamp: Optional[str] = None
-    source: Optional[str] = None
-    severity: Optional[str] = None
-    message: Optional[str] = None
+    timestamp: str | None = None
+    source: str | None = None
+    severity: str | None = None
+    message: str | None = None
     extra: dict = field(default_factory=dict)
 
 
@@ -66,7 +66,7 @@ class LogParser:
         self._custom_patterns[name] = re.compile(pattern)
         self._formats[LogFormat.CUSTOM] = self._custom_patterns[name]
 
-    def detect_format(self, line: str) -> Optional[str]:
+    def detect_format(self, line: str) -> str | None:
         if line.lstrip().startswith("{"):
             return LogFormat.JSON
         for fmt_name, pat in self._formats.items():
@@ -74,7 +74,7 @@ class LogParser:
                 return fmt_name
         return None
 
-    def parse_line(self, line: str, fmt: Optional[str] = None) -> Optional[ParsedLog]:
+    def parse_line(self, line: str, fmt: str | None = None) -> ParsedLog | None:
         line = line.strip()
         if not line:
             return None
@@ -92,7 +92,7 @@ class LogParser:
             return None
         return self._build_parsed_log(line, fmt, m)
 
-    def parse_file(self, path: str, fmt: Optional[str] = None) -> list[ParsedLog]:
+    def parse_file(self, path: str, fmt: str | None = None) -> list[ParsedLog]:
         entries: list[ParsedLog] = []
         with Path(path).open(encoding="utf-8", errors="replace") as f:
             for line in f:
@@ -107,7 +107,7 @@ class LogParser:
             if entry is not None:
                 yield entry
 
-    def _parse_json(self, line: str) -> Optional[ParsedLog]:
+    def _parse_json(self, line: str) -> ParsedLog | None:
         try:
             obj = json.loads(line)
         except json.JSONDecodeError:

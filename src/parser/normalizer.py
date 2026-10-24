@@ -1,14 +1,13 @@
-from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Optional
+from datetime import datetime
 
 from .log_parser import ParsedLog
 
 
 @dataclass
 class NormalizedLog:
-    timestamp: Optional[str] = None
-    source: Optional[str] = None
+    timestamp: str | None = None
+    source: str | None = None
     severity: str = "INFO"
     message: str = ""
     log_type: str = "unknown"
@@ -95,7 +94,7 @@ class LogNormalizer:
         return tags
 
     @staticmethod
-    def _normalize_timestamp(ts: Optional[str], log_type: str) -> Optional[str]:
+    def _normalize_timestamp(ts: str | None, log_type: str) -> str | None:
         if ts is None:
             return None
         try:

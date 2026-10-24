@@ -1,20 +1,18 @@
-import sys
-import json
 import logging
+import sys
 from pathlib import Path
-from typing import Optional
 
 import click
 import pandas as pd
 from rich.console import Console
 from rich.table import Table
 
-from src.parser.log_parser import LogParser
-from src.parser.normalizer import LogNormalizer
 from src.features.extractor import FeatureExtractor
 from src.models.anomaly_detector import AnomalyDetector
 from src.models.classifier import LogClassifier
 from src.models.pattern_recognizer import PatternRecognizer
+from src.parser.log_parser import LogParser
+from src.parser.normalizer import LogNormalizer
 from src.visualization.dashboard import LogDashboard
 
 console = Console()
@@ -65,9 +63,8 @@ def _load_or_create_models(model_dir: str) -> tuple[AnomalyDetector, LogClassifi
 @click.option("--input-dir", "-i", required=True, help="Directory containing log files")
 @click.option("--model-dir", "-m", default=None, help="Directory to save trained models")
 @click.pass_context
-def train(ctx: click.Context, input_dir: str, model_dir: Optional[str]) -> None:
+def train(ctx: click.Context, input_dir: str, model_dir: str | None) -> None:
     """Train ML models on log data."""
-    from sklearn.model_selection import train_test_split
 
     model_dir = model_dir or ctx.obj["model_dir"]
     model_path = Path(model_dir)
@@ -129,7 +126,7 @@ def train(ctx: click.Context, input_dir: str, model_dir: Optional[str]) -> None:
 @click.option("--file", "-f", "file_path", help="File with log lines to analyze")
 @click.option("--format", "-fmt", "log_format", help="Log format hint")
 @click.pass_context
-def analyze(ctx: click.Context, log_line: Optional[str], file_path: Optional[str], log_format: Optional[str]) -> None:
+def analyze(ctx: click.Context, log_line: str | None, file_path: str | None, log_format: str | None) -> None:
     """Analyze a log line or file for anomalies."""
     model_dir = ctx.obj["model_dir"]
     anomaly, classifier, recognizer = _load_or_create_models(model_dir)
@@ -190,7 +187,7 @@ def analyze(ctx: click.Context, log_line: Optional[str], file_path: Optional[str
 @cli.command()
 @click.option("--file", "-f", "file_path", help="File to watch (stream)")
 @click.pass_context
-def watch(ctx: click.Context, file_path: Optional[str]) -> None:
+def watch(ctx: click.Context, file_path: str | None) -> None:
     """Watch a log file or stdin in real-time with dashboard."""
     model_dir = ctx.obj["model_dir"]
     anomaly, _, _ = _load_or_create_models(model_dir)
@@ -245,9 +242,10 @@ def dashboard(ctx: click.Context) -> None:
 @click.option("--port", default=8000, type=int, help="Port to bind to")
 @click.option("--model-dir", "-m", default=None, help="Directory with trained models")
 @click.pass_context
-def serve(ctx: click.Context, host: str, port: int, model_dir: Optional[str]) -> None:
+def serve(ctx: click.Context, host: str, port: int, model_dir: str | None) -> None:
     """Start the FastAPI REST API server."""
     import uvicorn
+
     from src.api.server import create_app
 
     model_dir = model_dir or ctx.obj["model_dir"]

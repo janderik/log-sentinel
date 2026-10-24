@@ -1,8 +1,8 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 from fastapi import FastAPI
+
 from .routes import router
 
 logger = logging.getLogger(__name__)
@@ -31,10 +31,10 @@ def create_app(model_dir: str = "models") -> FastAPI:
         if not model_path.exists():
             logger.warning("Model directory %s not found", model_dir)
             return
+        from src.features.extractor import FeatureExtractor
         from src.models.anomaly_detector import AnomalyDetector
         from src.models.classifier import LogClassifier
         from src.models.pattern_recognizer import PatternRecognizer
-        from src.features.extractor import FeatureExtractor
         from src.parser.log_parser import LogParser
         from src.parser.normalizer import LogNormalizer
 

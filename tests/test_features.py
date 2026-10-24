@@ -1,5 +1,5 @@
-import pytest
 import pandas as pd
+
 from src.features.extractor import FeatureExtractor
 from src.features.vectorizer import LogVectorizer
 from src.parser.log_parser import LogParser

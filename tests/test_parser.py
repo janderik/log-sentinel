@@ -1,5 +1,4 @@
-import pytest
-from src.parser.log_parser import LogParser, LogFormat
+from src.parser.log_parser import LogFormat, LogParser
 from src.parser.normalizer import LogNormalizer
 
 

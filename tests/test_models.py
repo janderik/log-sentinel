@@ -1,6 +1,6 @@
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
 from sklearn.datasets import make_classification
 
 from src.models.anomaly_detector import AnomalyDetector

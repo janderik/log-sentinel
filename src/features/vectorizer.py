@@ -1,8 +1,7 @@
-from typing import Optional
 
+import joblib
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer as SkTfidfVectorizer
-import joblib
 
 
 class LogVectorizer:

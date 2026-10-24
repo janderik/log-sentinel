@@ -1,4 +1,3 @@
-from typing import Optional
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -11,7 +10,7 @@ class PatternRecognizer:
         self._vectorizer = LogVectorizer(max_features=max_features, ngram_range=(2, 4))
         self._fitted = False
         self._patterns: list[str] = []
-        self._embedding_matrix: Optional[np.ndarray] = None
+        self._embedding_matrix: np.ndarray | None = None
 
     @property
     def is_fitted(self) -> bool:
