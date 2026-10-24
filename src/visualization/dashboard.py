@@ -1,26 +1,23 @@
 import time
-from typing import Optional
 from collections import Counter, deque
 
+import pandas as pd
+from rich import box
+from rich.layout import Layout
 from rich.live import Live
 from rich.table import Table
-from rich.panel import Panel
-from rich.layout import Layout
 from rich.text import Text
-from rich import box
 
-from src.parser.log_parser import LogParser
-from src.parser.normalizer import LogNormalizer
 from src.features.extractor import FeatureExtractor
 from src.models.anomaly_detector import AnomalyDetector
-
-import pandas as pd
+from src.parser.log_parser import LogParser
+from src.parser.normalizer import LogNormalizer
 
 
 class LogDashboard:
     def __init__(
         self,
-        anomaly_detector: Optional[AnomalyDetector] = None,
+        anomaly_detector: AnomalyDetector | None = None,
         max_history: int = 100,
     ) -> None:
         self.anomaly_detector = anomaly_detector
@@ -120,13 +117,12 @@ class LogDashboard:
         layout = Layout()
         layout.split_column(
             Layout(self._build_stats_table(), name="stats"),
-            Layout(
-                Layout.split_row(
-                    Layout(self._build_severity_table(), name="severity"),
-                    Layout(self._build_type_table(), name="types"),
-                ),
-            ),
+            Layout(name="breakdown"),
             Layout(self._build_anomaly_table(), name="anomalies"),
+        )
+        layout["breakdown"].split_row(
+            Layout(self._build_severity_table(), name="severity"),
+            Layout(self._build_type_table(), name="types"),
         )
         return layout
 

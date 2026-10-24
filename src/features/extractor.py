@@ -1,9 +1,7 @@
 import math
 import re
 from datetime import datetime
-from typing import Optional
 
-import numpy as np
 import pandas as pd
 
 from src.parser.normalizer import NormalizedLog
@@ -163,4 +161,4 @@ class FeatureExtractor:
             prob[ch] = prob.get(ch, 0.0) + 1.0
         length = len(text)
         entropy = -sum(p / length * math.log2(p / length) for p in prob.values())
-        return entropy
+        return entropy if entropy > 0 else 0.0  # avoid -0.0 for single-symbol text

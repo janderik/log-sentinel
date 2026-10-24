@@ -1,14 +1,13 @@
-from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Optional
+from datetime import datetime
 
 from .log_parser import ParsedLog
 
 
 @dataclass
 class NormalizedLog:
-    timestamp: Optional[str] = None
-    source: Optional[str] = None
+    timestamp: str | None = None
+    source: str | None = None
     severity: str = "INFO"
     message: str = ""
     log_type: str = "unknown"
@@ -76,7 +75,7 @@ class LogNormalizer:
                     tags.append("unauthorized")
                 if status == 403:
                     tags.append("forbidden")
-                if status == 500:
+                if status >= 500:  # 502/503/504 are server errors too
                     tags.append("server_error")
                 if status == 304:
                     tags.append("not_modified")
@@ -95,7 +94,7 @@ class LogNormalizer:
         return tags
 
     @staticmethod
-    def _normalize_timestamp(ts: Optional[str], log_type: str) -> Optional[str]:
+    def _normalize_timestamp(ts: str | None, log_type: str) -> str | None:
         if ts is None:
             return None
         try:

@@ -1,6 +1,6 @@
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
 from sklearn.datasets import make_classification
 
 from src.models.anomaly_detector import AnomalyDetector
@@ -133,3 +133,46 @@ class TestPatternRecognizer:
         assert loaded.is_fitted
         results = loaded.query("test message")
         assert len(results) > 0
+
+
+def test_classifier_evaluate_on_subset_of_classes() -> None:
+    """Evaluation data may lack some training classes; that must not crash."""
+    X, y = make_classification(n_samples=150, n_features=6, n_informative=4, n_classes=3, random_state=0)
+    names = np.array(["INFO", "WARN", "ERROR"])[y].tolist()
+    clf = LogClassifier().fit(pd.DataFrame(X), names)
+    only_two = [i for i, n in enumerate(names) if n != "ERROR"][:40]
+    report = clf.evaluate(pd.DataFrame(X[only_two]), [names[i] for i in only_two])
+    assert 0.0 <= report["accuracy"] <= 1.0
+    assert "ERROR" in report["classification_report"]
+
+
+def test_classifier_evaluate_rejects_unknown_labels() -> None:
+    X, y = make_classification(n_samples=60, n_features=4, n_informative=3, n_redundant=0, n_classes=2, random_state=1)
+    clf = LogClassifier().fit(pd.DataFrame(X), ["A" if v else "B" for v in y])
+    with pytest.raises(ValueError, match="not seen during training"):
+        clf.evaluate(pd.DataFrame(X[:3]), ["A", "B", "C"])
+
+
+def test_anomaly_score_is_independent_of_the_batch() -> None:
+    rng = np.random.default_rng(0)
+    train = pd.DataFrame(rng.normal(0, 1, (300, 5)))
+    detector = AnomalyDetector().fit(train)
+    normal, outlier = [0.0] * 5, [8.0] * 5
+
+    alone = detector.anomaly_score(pd.DataFrame([outlier]))[0]
+    in_batch = detector.anomaly_score(pd.DataFrame([normal, outlier]))[1]
+    assert alone == pytest.approx(in_batch)
+    # A single line no longer collapses to 0.5: outliers score clearly higher.
+    assert detector.anomaly_score(pd.DataFrame([normal]))[0] < alone
+    assert alone > 0.9
+
+
+def test_anomaly_score_range_survives_save_load(tmp_path) -> None:
+    train = pd.DataFrame(np.random.default_rng(1).normal(0, 1, (100, 4)))
+    detector = AnomalyDetector().fit(train)
+    path = str(tmp_path / "a.joblib")
+    detector.save(path)
+    sample = pd.DataFrame([[5.0] * 4])
+    assert AnomalyDetector.load(path).anomaly_score(sample)[0] == pytest.approx(
+        detector.anomaly_score(sample)[0]
+    )

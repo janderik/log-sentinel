@@ -1,5 +1,6 @@
 import pytest
-from src.parser.log_parser import LogParser, LogFormat
+
+from src.parser.log_parser import LogFormat, LogParser
 from src.parser.normalizer import LogNormalizer
 
 
@@ -26,7 +27,15 @@ class TestLogParser:
         parsed = self.parser.parse_line(line)
         assert parsed is not None
         assert parsed.severity == "ERROR"
-        assert "server_error" in parsed.extra or "server_error" in parsed.__dict__
+        assert parsed.extra["status"] == 500
+        # Tagging happens in the normalizer, one stage after parsing.
+        assert "server_error" in LogNormalizer().normalize(parsed).tags
+
+    @pytest.mark.parametrize("status", [500, 502, 503, 504])
+    def test_all_5xx_tagged_as_server_error(self, status: int) -> None:
+        line = f'203.0.113.5 - - [10/Oct/2023:14:40:05 -0700] "GET / HTTP/1.1" {status} 0'
+        parsed = self.parser.parse_line(line)
+        assert "server_error" in LogNormalizer().normalize(parsed).tags
 
     def test_detect_syslog(self) -> None:
         line = "Oct 10 13:55:36 webserver01 sshd[1234]: Accepted publickey for frank from 192.168.1.1"

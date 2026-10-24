@@ -1,23 +1,21 @@
+# Requires Python >= 3.10 (declared in setup.py; pip cannot install "python").
+
 # Core
-python>=3.10
-scikit-learn==1.3.2
-numpy==1.26.4
-pandas==2.1.5
-joblib==1.3.2
+scikit-learn>=1.3,<2
+numpy>=1.26,<3
+pandas>=2.1,<3
+joblib>=1.3
 
 # API
-fastapi==0.109.0
-uvicorn==0.27.0
-pydantic==2.5.3
+fastapi>=0.109
+uvicorn>=0.27
+pydantic>=2.5,<3
+httpx>=0.27  # used by FastAPI's TestClient
 
 # CLI
-click==8.1.7
-rich==13.7.0
+click>=8.1
+rich>=13.7
 
 # Testing
-pytest==8.0.0
-pytest-cov==4.1.0
-
-# Dev
-mypy==1.8.0
-ruff==0.2.0
+pytest>=8.0
+pytest-cov>=4.1

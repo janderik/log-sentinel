@@ -1,17 +1,15 @@
 import logging
-from typing import Optional
-
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
 import pandas as pd
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
 
-from src.parser.log_parser import LogParser, LogFormat
-from src.parser.normalizer import LogNormalizer
 from src.features.extractor import FeatureExtractor
 from src.models.anomaly_detector import AnomalyDetector
 from src.models.classifier import LogClassifier
 from src.models.pattern_recognizer import PatternRecognizer
+from src.parser.log_parser import LogParser
+from src.parser.normalizer import LogNormalizer
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -19,22 +17,22 @@ router = APIRouter()
 
 class LogEntryIn(BaseModel):
     line: str
-    format: Optional[str] = None
+    format: str | None = None
 
 
 class LogAnalysisOut(BaseModel):
     parsed: dict
     normalized: dict
     features: dict
-    anomaly_score: Optional[float] = None
-    is_anomaly: Optional[bool] = None
-    predicted_severity: Optional[str] = None
+    anomaly_score: float | None = None
+    is_anomaly: bool | None = None
+    predicted_severity: str | None = None
     similar_patterns: list[dict] = []
 
 
 class BatchAnalysisIn(BaseModel):
     lines: list[str]
-    format: Optional[str] = None
+    format: str | None = None
 
 
 class BatchAnalysisOut(BaseModel):
@@ -44,14 +42,17 @@ class BatchAnalysisOut(BaseModel):
 
 
 @router.post("/analyze", response_model=LogAnalysisOut)
-async def analyze_log(entry: LogEntryIn):
-    app = router._app_ref
-    parser: LogParser = app.state.parser
-    normalizer: LogNormalizer = app.state.normalizer
-    extractor: FeatureExtractor = app.state.feature_extractor
-    anomaly_detector: Optional[AnomalyDetector] = app.state.anomaly_detector
-    classifier: Optional[LogClassifier] = app.state.classifier
-    pattern_recognizer: Optional[PatternRecognizer] = app.state.pattern_recognizer
+async def analyze_log(entry: LogEntryIn, request: Request):
+    return _analyze(request.app.state, entry)
+
+
+def _analyze(state, entry: LogEntryIn) -> LogAnalysisOut:
+    parser: LogParser = state.parser
+    normalizer: LogNormalizer = state.normalizer
+    extractor: FeatureExtractor = state.feature_extractor
+    anomaly_detector: AnomalyDetector | None = state.anomaly_detector
+    classifier: LogClassifier | None = state.classifier
+    pattern_recognizer: PatternRecognizer | None = state.pattern_recognizer
 
     fmt = entry.format
     if fmt and fmt not in ("apache_combined", "syslog_rfc3164", "windows_event", "json"):
@@ -64,9 +65,9 @@ async def analyze_log(entry: LogEntryIn):
     normalized = normalizer.normalize(parsed)
     features = extractor.extract(normalized)
 
-    anomaly_score: Optional[float] = None
-    is_anomaly: Optional[bool] = None
-    predicted_severity: Optional[str] = None
+    anomaly_score: float | None = None
+    is_anomaly: bool | None = None
+    predicted_severity: str | None = None
     similar_patterns: list[dict] = []
 
     if anomaly_detector is not None:
@@ -96,14 +97,13 @@ async def analyze_log(entry: LogEntryIn):
 
 
 @router.post("/analyze/batch", response_model=BatchAnalysisOut)
-async def analyze_batch(batch: BatchAnalysisIn):
-    app = router._app_ref
+async def analyze_batch(batch: BatchAnalysisIn, request: Request):
     results: list[LogAnalysisOut] = []
     anomaly_count = 0
 
     for line in batch.lines:
         try:
-            result = await analyze_log(LogEntryIn(line=line, format=batch.format))
+            result = _analyze(request.app.state, LogEntryIn(line=line, format=batch.format))
             results.append(result)
             if result.is_anomaly:
                 anomaly_count += 1
@@ -122,10 +122,10 @@ async def analyze_batch(batch: BatchAnalysisIn):
 
 
 @router.get("/models/status")
-async def model_status():
-    app = router._app_ref
+async def model_status(request: Request):
+    state = request.app.state
     return {
-        "anomaly_detector": app.state.anomaly_detector is not None,
-        "classifier": app.state.classifier is not None,
-        "pattern_recognizer": app.state.pattern_recognizer is not None,
+        "anomaly_detector": state.anomaly_detector is not None,
+        "classifier": state.classifier is not None,
+        "pattern_recognizer": state.pattern_recognizer is not None,
     }

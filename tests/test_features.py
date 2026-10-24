@@ -1,5 +1,5 @@
-import pytest
 import pandas as pd
+
 from src.features.extractor import FeatureExtractor
 from src.features.vectorizer import LogVectorizer
 from src.parser.log_parser import LogParser
@@ -49,7 +49,9 @@ class TestFeatureExtractor:
 
     def test_entropy(self) -> None:
         assert self.extractor._shannon_entropy("") == 0.0
-        assert self.extractor._shannon_entropy("aaaa") > 0
+        # A single repeated symbol carries no uncertainty: entropy is exactly 0.
+        assert self.extractor._shannon_entropy("aaaa") == 0.0
+        assert self.extractor._shannon_entropy("ab") == 1.0
         entropy_random = self.extractor._shannon_entropy("aB3$xY9#qR")
         entropy_repeated = self.extractor._shannon_entropy("aaaaaaaaaa")
         assert entropy_random > entropy_repeated

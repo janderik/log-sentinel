@@ -1,4 +1,3 @@
-import sys
 import argparse
 
 from src.api.server import create_app
