@@ -117,13 +117,12 @@ class LogDashboard:
         layout = Layout()
         layout.split_column(
             Layout(self._build_stats_table(), name="stats"),
-            Layout(
-                Layout.split_row(
-                    Layout(self._build_severity_table(), name="severity"),
-                    Layout(self._build_type_table(), name="types"),
-                ),
-            ),
+            Layout(name="breakdown"),
             Layout(self._build_anomaly_table(), name="anomalies"),
+        )
+        layout["breakdown"].split_row(
+            Layout(self._build_severity_table(), name="severity"),
+            Layout(self._build_type_table(), name="types"),
         )
         return layout
 

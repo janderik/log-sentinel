@@ -10,9 +10,9 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="LogSentinel Team",
-    url="https://github.com/logsentinel/log-sentinel",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    url="https://github.com/janderik/log-sentinel",
+    # The code imports itself as "src.*", so the package is installed under that name.
+    packages=find_packages(include=["src", "src.*"]),
     python_requires=">=3.10",
     install_requires=[
         "scikit-learn>=1.3",
@@ -35,8 +35,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "logsentinel=cli:cli",
-            "logsentinelserve=api.serve_app:main",
+            "logsentinel=src.cli:cli",
+            "logsentinelserve=src.api.serve_app:main",
         ],
     },
     classifiers=[

@@ -75,7 +75,7 @@ class LogNormalizer:
                     tags.append("unauthorized")
                 if status == 403:
                     tags.append("forbidden")
-                if status == 500:
+                if status >= 500:  # 502/503/504 are server errors too
                     tags.append("server_error")
                 if status == 304:
                     tags.append("not_modified")

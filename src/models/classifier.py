@@ -31,6 +31,11 @@ class LogClassifier:
     def is_fitted(self) -> bool:
         return self._fitted
 
+    def _encoders(self) -> tuple[dict[str, int], dict[int, str]]:
+        if not self._fitted or self._label_encoder is None or self._reverse_encoder is None:
+            raise RuntimeError("Model not fitted. Call fit() first.")
+        return self._label_encoder, self._reverse_encoder
+
     def fit(self, features: pd.DataFrame, labels: list[str]) -> "LogClassifier":
         unique = sorted(set(labels))
         self._label_encoder = {lab: i for i, lab in enumerate(unique)}
@@ -42,10 +47,9 @@ class LogClassifier:
         return self
 
     def predict(self, features: pd.DataFrame) -> list[str]:
-        if not self._fitted:
-            raise RuntimeError("Model not fitted. Call fit() first.")
+        _, reverse = self._encoders()
         raw = self._model.predict(features)
-        return [self._reverse_encoder[int(i)] for i in raw]
+        return [reverse[int(i)] for i in raw]
 
     def predict_proba(self, features: pd.DataFrame) -> np.ndarray:
         if not self._fitted:
@@ -53,16 +57,25 @@ class LogClassifier:
         return self._model.predict_proba(features)
 
     def evaluate(self, features: pd.DataFrame, labels: list[str]) -> dict[str, Any]:
-        if not self._fitted:
-            raise RuntimeError("Model not fitted. Call fit() first.")
+        encoder, _ = self._encoders()
+        unknown = sorted(set(labels) - set(encoder))
+        if unknown:
+            raise ValueError(f"Labels not seen during training: {unknown}")
         preds = self.predict(features)
-        y_true = np.array([self._label_encoder[l] for l in labels])
-        y_pred = np.array([self._label_encoder[p] for p in preds])
+        y_true = np.array([encoder[label] for label in labels])
+        y_pred = np.array([encoder[p] for p in preds])
+        class_ids = list(encoder.values())
         return {
             "accuracy": float(accuracy_score(y_true, y_pred)),
             "f1_weighted": float(f1_score(y_true, y_pred, average="weighted")),
+            # Explicit labels: the evaluation set may not contain every class.
             "classification_report": classification_report(
-                y_true, y_pred, target_names=list(self._label_encoder.keys()), output_dict=True
+                y_true,
+                y_pred,
+                labels=class_ids,
+                target_names=list(encoder.keys()),
+                output_dict=True,
+                zero_division=0,
             ),
         }
 

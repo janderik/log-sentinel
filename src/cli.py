@@ -1,9 +1,11 @@
 import logging
 import sys
+import time
 from pathlib import Path
 
 import click
 import pandas as pd
+from rich import box
 from rich.console import Console
 from rich.table import Table
 
@@ -129,7 +131,7 @@ def train(ctx: click.Context, input_dir: str, model_dir: str | None) -> None:
 def analyze(ctx: click.Context, log_line: str | None, file_path: str | None, log_format: str | None) -> None:
     """Analyze a log line or file for anomalies."""
     model_dir = ctx.obj["model_dir"]
-    anomaly, classifier, recognizer = _load_or_create_models(model_dir)
+    anomaly, classifier, _recognizer = _load_or_create_models(model_dir)
 
     parser = LogParser()
     normalizer = LogNormalizer()
@@ -210,7 +212,7 @@ def watch(ctx: click.Context, file_path: str | None) -> None:
 def dashboard(ctx: click.Context) -> None:
     """Open an interactive text-based dashboard."""
     model_dir = ctx.obj["model_dir"]
-    anomaly, classifier, recognizer = _load_or_create_models(model_dir)
+    anomaly, _classifier, _recognizer = _load_or_create_models(model_dir)
 
     dashboard = LogDashboard(
         anomaly_detector=anomaly if anomaly.is_fitted else None,

@@ -1,7 +1,7 @@
 import logging
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from src.features.extractor import FeatureExtractor
@@ -42,14 +42,17 @@ class BatchAnalysisOut(BaseModel):
 
 
 @router.post("/analyze", response_model=LogAnalysisOut)
-async def analyze_log(entry: LogEntryIn):
-    app = router._app_ref
-    parser: LogParser = app.state.parser
-    normalizer: LogNormalizer = app.state.normalizer
-    extractor: FeatureExtractor = app.state.feature_extractor
-    anomaly_detector: AnomalyDetector | None = app.state.anomaly_detector
-    classifier: LogClassifier | None = app.state.classifier
-    pattern_recognizer: PatternRecognizer | None = app.state.pattern_recognizer
+async def analyze_log(entry: LogEntryIn, request: Request):
+    return _analyze(request.app.state, entry)
+
+
+def _analyze(state, entry: LogEntryIn) -> LogAnalysisOut:
+    parser: LogParser = state.parser
+    normalizer: LogNormalizer = state.normalizer
+    extractor: FeatureExtractor = state.feature_extractor
+    anomaly_detector: AnomalyDetector | None = state.anomaly_detector
+    classifier: LogClassifier | None = state.classifier
+    pattern_recognizer: PatternRecognizer | None = state.pattern_recognizer
 
     fmt = entry.format
     if fmt and fmt not in ("apache_combined", "syslog_rfc3164", "windows_event", "json"):
@@ -94,14 +97,13 @@ async def analyze_log(entry: LogEntryIn):
 
 
 @router.post("/analyze/batch", response_model=BatchAnalysisOut)
-async def analyze_batch(batch: BatchAnalysisIn):
-    app = router._app_ref
+async def analyze_batch(batch: BatchAnalysisIn, request: Request):
     results: list[LogAnalysisOut] = []
     anomaly_count = 0
 
     for line in batch.lines:
         try:
-            result = await analyze_log(LogEntryIn(line=line, format=batch.format))
+            result = _analyze(request.app.state, LogEntryIn(line=line, format=batch.format))
             results.append(result)
             if result.is_anomaly:
                 anomaly_count += 1
@@ -120,10 +122,10 @@ async def analyze_batch(batch: BatchAnalysisIn):
 
 
 @router.get("/models/status")
-async def model_status():
-    app = router._app_ref
+async def model_status(request: Request):
+    state = request.app.state
     return {
-        "anomaly_detector": app.state.anomaly_detector is not None,
-        "classifier": app.state.classifier is not None,
-        "pattern_recognizer": app.state.pattern_recognizer is not None,
+        "anomaly_detector": state.anomaly_detector is not None,
+        "classifier": state.classifier is not None,
+        "pattern_recognizer": state.pattern_recognizer is not None,
     }

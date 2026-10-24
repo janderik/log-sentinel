@@ -3,9 +3,9 @@
   <p><strong>ML-Powered Log Analyzer — Anomaly Detection, Classification & Pattern Recognition</strong></p>
 
   ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-  ![CI](https://github.com/logsentinel/log-sentinel/actions/workflows/ci.yml/badge.svg)
+  [![CI](https://github.com/janderik/log-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/janderik/log-sentinel/actions/workflows/ci.yml)
   ![License](https://img.shields.io/badge/license-MIT-green)
-  [![codecov](https://codecov.io/gh/logsentinel/log-sentinel/branch/main/graph/badge.svg)](https://codecov.io/gh/logsentinel/log-sentinel)
+  [![codecov](https://codecov.io/gh/janderik/log-sentinel/branch/main/graph/badge.svg)](https://codecov.io/gh/janderik/log-sentinel)
 </div>
 
 ---
@@ -44,7 +44,7 @@
 
 ```bash
 # Clone & install
-git clone https://github.com/logsentinel/log-sentinel.git
+git clone https://github.com/janderik/log-sentinel.git
 cd log-sentinel
 pip install -r requirements.txt
 pip install -e .
